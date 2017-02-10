@@ -1,4 +1,5 @@
 <?php
+ini_set('max_execution_time', 300);
 // Load the Google API PHP Client Library.
 require_once __DIR__ . '/vendor/autoload.php';
 require __DIR__ . '/excel_reader/read_and_filter_excel.php';
@@ -9,6 +10,8 @@ $apenAllPages = sheetData($excel);
 
 $verwijderen = array();
 $blijven = array();
+
+
 
 
 // Start a session to persist credentials.
@@ -36,22 +39,8 @@ if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
   $whileLoop = true;
   $count = 0;
   $total = array();
-  // while ($whileLoop) {
-  //   $start_index = $count * 10000 + 1;
-  //   $results = getResults($analytics, $profile, $start_index);
-  //   $results = $results->getRows();
-  //   var_dump($start_index);
-  //   if ($results == NULL || count($results) < 1) {
-  //     $whileLoop = false;
-  //   }
-  //   else {
-  //     $total = array_merge($total, $results);
-  //     $count = $count + 1;
-  //   } 
-  // }
-
-  for ($i=0; $i < 5 ; $i++) { 
-    $start_index = $count * 1000 + 1;
+  while ($whileLoop) {
+    $start_index = $count * 10000 + 1;
     $results = getResults($analytics, $profile, $start_index);
     $results = $results->getRows();
     var_dump($start_index);
@@ -63,6 +52,20 @@ if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
       $count = $count + 1;
     } 
   }
+  $test = $total;
+  // for ($i=0; $i < 5 ; $i++) { 
+  //   $start_index = $count * 1000 + 1;
+  //   $results = getResults($analytics, $profile, $start_index);
+  //   $results = $results->getRows();
+  //   var_dump($start_index);
+  //   if ($results == NULL || count($results) < 1) {
+  //     $whileLoop = false;
+  //   }
+  //   else {
+  //     $total = array_merge($total, $results);
+  //     $count = $count + 1;
+  //   } 
+  // }
   
   $patterns = array('#\?#', '#\/edit#', '#\/delete\/#', '#\/search\/#', '#\/webform\/#', '#\/users\/#', '#\/user\/#', '#\/delete#', '#\/repeats#', '#\/attach\/#', '#\/attachcomplete#', '#\/batch#', '#\/comment\/#', '#\/abuse\/#', '#\/category\/#');
   foreach ($total as $key=>$row) {
@@ -82,8 +85,9 @@ if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
     $magBlijven = false;
     foreach ($apenAllPages as $apenPage) {
       if ($GAPage[0] == $apenPage) {
-        var_dump($apenPage);
-        $magblijven = true;
+        // var_dump($apenPage);
+        // var_dump($GAPage[0]);
+        $magBlijven = true;
       }
     }
     if ($magBlijven) {
@@ -144,7 +148,7 @@ function getResults($analytics, $profileId, $start_index) {
   $metrics = 'ga:pageviews';
   $dimensions = 'ga:pagePath';
   $sort = 'ga:pageviews';
-  $max_results = 1000;
+  $max_results = 10000;
   $start_index = $start_index;
   return $analytics->data_ga->get(
         'ga:'.$profileId,
@@ -196,6 +200,40 @@ function getResults($analytics, $profileId, $start_index) {
         </tr>
       <?php endforeach; ?>
     </tbody>
+<!--   </table>
+  <h1>ALLE GApagina's</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Number</th>
+        <th>Paginas</th>
+      </tr>
+    </thead>
+    <tbody>
+      <?php foreach ($test as $key=>$row): ?>
+        <tr>
+            <td><?= $key ?></td>
+            <td><?= $row[0] ?></td>
+        </tr>
+      <?php endforeach; ?>
+    </tbody>
   </table>
+  <h1>ALLE ONLINE PAGINA'S</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Number</th>
+        <th>Paginas</th>
+      </tr>
+    </thead>
+    <tbody>
+      <?php foreach ($apenAllPages as $key=>$row): ?>
+        <tr>
+            <td><?= $key ?></td>
+            <td><?= $row ?></td>
+        </tr>
+      <?php endforeach; ?>
+    </tbody>
+  </table> -->
 </body>
 </html>
