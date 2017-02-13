@@ -99,7 +99,7 @@ if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
   }
   // $rows = $total; array_push($verwijderen, $apenPage);
 } else {
-  $redirect_uri = 'http://' . $_SERVER['HTTP_HOST'] . '/apen.be/test/oauth2callback.php';
+  $redirect_uri = 'http://' . $_SERVER['HTTP_HOST'] . '/test/google_analytics/google-api-php-client-2.1.2/oauth2callback.php';
   header('Location: ' . filter_var($redirect_uri, FILTER_SANITIZE_URL));
 }
 

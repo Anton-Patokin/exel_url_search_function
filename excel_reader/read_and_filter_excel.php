@@ -1,7 +1,13 @@
 <?php
 include 'excel_reader.php';     // include the class
+//include __DIR__ . '\forceutf8\encode.php';
+//include __DIR__ . '\forceutf8\forceutf8-master\src\ForceUTF8\Encoding.php';
 
+require_once __DIR__ .'\forceutf8\forceutf8-master\src\ForceUTF8\Encoding.php';
+use \ForceUTF8\Encoding;
+//use forceutf8\ForceUTF8;
 // creates an object instance of the class, and read the excel file data
+
 
 function sheetData($excel) {
   $nr_sheets = count($excel->sheets);       // gets the number of sheets
@@ -11,10 +17,11 @@ function sheetData($excel) {
   while($x <= $sheet['numRows']) {
 
 
-    $cell = isset($sheet['cells'][$x][5]) ? '/'.$sheet['cells'][$x][5] : '';
+    $cell = isset($sheet['cells'][$x][5]) ? '/'.Encoding::toUTF8($sheet['cells'][$x][5]) : '';
     if(empty($cell)){
-      $cell = isset($sheet['cells'][$x][4]) ? '/'.$sheet['cells'][$x][4] : '';
+      $cell = isset($sheet['cells'][$x][4]) ? '/'.Encoding::toUTF8($sheet['cells'][$x][4]) : '';
     }
+
       array_push($url_array,$cell);
 
     $x++;
@@ -22,6 +29,11 @@ function sheetData($excel) {
   return $url_array;
 }
 
+//$excel = new PhpExcelReader;
+//$excel->read('apen_all_pages.xls');
+//$apenAllPages = sheetData($excel);
+
+var_dump($apenAllPages);
 
 //function sheetData($sheet) {
 //  var_dump($sheet) ;
