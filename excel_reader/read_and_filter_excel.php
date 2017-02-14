@@ -17,11 +17,11 @@ function sheetData($excel) {
   while($x <= $sheet['numRows']) {
 
 
-    $cell = isset($sheet['cells'][$x][5]) ? '/'.Encoding::toUTF8($sheet['cells'][$x][5]) : '';
+    $cell['url'] = isset($sheet['cells'][$x][5]) ? '/'.Encoding::toUTF8($sheet['cells'][$x][5]) : '';
     if(empty($cell)){
-      $cell = isset($sheet['cells'][$x][4]) ? '/'.Encoding::toUTF8($sheet['cells'][$x][4]) : '';
+      $cell['url'] = isset($sheet['cells'][$x][4]) ? '/'.Encoding::toUTF8($sheet['cells'][$x][4]) : '';
     }
-
+    $cell['id'] = isset($sheet['cells'][$x][1]) ? Encoding::toUTF8($sheet['cells'][$x][1]) : '';
       array_push($url_array,$cell);
 
     $x++;
@@ -29,11 +29,16 @@ function sheetData($excel) {
   return $url_array;
 }
 
+
+
+
 //$excel = new PhpExcelReader;
 //$excel->read('apen_all_pages.xls');
 //$apenAllPages = sheetData($excel);
-
-var_dump($apenAllPages);
+//
+//echo "<pre>";
+//var_dump($apenAllPages);
+//echo "</pre>"
 
 //function sheetData($sheet) {
 //  var_dump($sheet) ;
