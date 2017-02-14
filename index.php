@@ -3,6 +3,7 @@ ini_set('max_execution_time', 300);
 // Load the Google API PHP Client Library.
 require_once __DIR__ . '/vendor/autoload.php';
 require __DIR__ . '/excel_reader/read_and_filter_excel.php';
+require_once __DIR__ . '/excel_export/Classes/PHPExcel.php';
 
 $excel = new PhpExcelReader;
 $excel->read('apen_all_pages.xls');
@@ -10,12 +11,14 @@ $apenAllPages = sheetData($excel);
 
 $verwijderen = array();
 $blijven = array();
+$brokenUrls = array();
 
 
 
 
 // Start a session to persist credentials.
 session_start();
+
 
 
 // Create the client object and set the authorization configuration
@@ -52,7 +55,6 @@ if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
       $count = $count + 1;
     } 
   }
-  $test = $total;
   // for ($i=0; $i < 5 ; $i++) { 
   //   $start_index = $count * 1000 + 1;
   //   $results = getResults($analytics, $profile, $start_index);
@@ -80,10 +82,9 @@ if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
     }
   }
   $total = array_values($total);
-  
-  foreach ($total as $GAPage) {
+  foreach ($total as $GAIndex=>$GAPage) {
     $magBlijven = false;
-    foreach ($apenAllPages as $apenPage) {
+    foreach ($apenAllPages as $apenIndex=>$apenPage) {
       if ($GAPage[0] == $apenPage) {
         // var_dump($apenPage);
         // var_dump($GAPage[0]);
@@ -97,9 +98,67 @@ if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
       array_push($verwijderen, $GAPage[0]);
     }
   }
+  $brokenPatterns = array('# -#', '#\+#', '#- #');
+  foreach ($verwijderen as $key=>$value) {
+    $brokenUrl = false;
+    foreach ($brokenPatterns as $pattern) {
+      if (preg_match($pattern, $value)) {
+        $brokenUrl = true;
+      }
+    }
+    if ($brokenUrl) {
+      unset($verwijderen[$key]);
+    }
+  }
+  $verwijderen = array_values($verwijderen);
+
+  // $filename = 'webdata_' . date('Ymd') . '.csv';
+
+  // header("Content-Disposition: attachment; filename=\"$filename\"");
+  // header("Content-Type: application/octet-stream"); 
+  // // that indicates it is binary so the OS won't mess with the filename
+  // // should work for all attachments, not just excel
+
+  // $out = fopen("php://output", 'w');  // write directly to php output, not to a file
+  // fputcsv($out, $verwijderen);
+  // fclose($out);
+
+// Create new PHPExcel object
+$objPHPExcel = new PHPExcel();
+// Set document properties
+$objPHPExcel->getProperties()->setCreator("Maarten Balliauw")
+               ->setLastModifiedBy("Maarten Balliauw")
+               ->setTitle("Office 2007 XLSX Test Document")
+               ->setSubject("Office 2007 XLSX Test Document")
+               ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+               ->setKeywords("office 2007 openxml php")
+               ->setCategory("Test result file");
+
+  foreach ($verwijderen as $key=>$value) {
+    $rownumber = $key+1;
+    $objPHPExcel->setActiveSheetIndex(0)
+            ->setCellValue('A' . $rownumber, $value);
+  }
+  
+ // Redirect output to a client’s web browser (Excel2007)
+  header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  header('Content-Type: text/html; charset=UTF-8');
+  header('Content-Disposition: attachment;filename="01simple.xlsx"');
+  header('Cache-Control: max-age=0');
+  // If you're serving to IE 9, then the following may be needed
+  header('Cache-Control: max-age=1');
+  // If you're serving to IE over SSL, then the following may be needed
+  header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+  header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+  header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+  header ('Pragma: public'); // HTTP/1.0
+  $objPHPExcel = mb_convert_encoding($objPHPExcel,'UTF-8');
+  $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+  $objWriter->save('php://output');
+
   // $rows = $total; array_push($verwijderen, $apenPage);
 } else {
-  $redirect_uri = 'http://' . $_SERVER['HTTP_HOST'] . '/test/google_analytics/google-api-php-client-2.1.2/oauth2callback.php';
+  $redirect_uri = 'http://' . $_SERVER['HTTP_HOST'] . '/apen.be/test/oauth2callback.php';
   header('Location: ' . filter_var($redirect_uri, FILTER_SANITIZE_URL));
 }
 
