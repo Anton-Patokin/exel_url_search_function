@@ -18,12 +18,14 @@ function sheetData($excel) {
 
 
     $cell['url'] = isset($sheet['cells'][$x][5]) ? '/'.Encoding::toUTF8($sheet['cells'][$x][5]) : '';
-    if(empty($cell)){
+    if(empty($cell['url'])){
       $cell['url'] = isset($sheet['cells'][$x][4]) ? '/'.Encoding::toUTF8($sheet['cells'][$x][4]) : '';
     }
     $cell['id'] = isset($sheet['cells'][$x][1]) ? Encoding::toUTF8($sheet['cells'][$x][1]) : '';
-      array_push($url_array,$cell);
 
+    if(!preg_match('/\s/',$cell['url'])){
+      array_push($url_array,$cell);
+    }
     $x++;
   }
   return $url_array;
@@ -31,10 +33,12 @@ function sheetData($excel) {
 
 
 
-
+//
 //$excel = new PhpExcelReader;
 //$excel->read('apen_all_pages.xls');
 //$apenAllPages = sheetData($excel);
+//
+//
 //
 //echo "<pre>";
 //var_dump($apenAllPages);

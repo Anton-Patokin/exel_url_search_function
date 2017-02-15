@@ -1,5 +1,5 @@
 <?php
-ini_set('max_execution_time', 300);
+ini_set('max_execution_time', 1000);
 // Load the Google API PHP Client Library.
 require_once __DIR__ . '/vendor/autoload.php';
 require __DIR__ . '/excel_reader/read_and_filter_excel.php';
@@ -82,35 +82,67 @@ if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
     }
   }
   $total = array_values($total);
-  foreach ($total as $GAIndex=>$GAPage) {
+
+
+
+
+//  foreach ($total as $key=>$google_url) {
+//    $magBlijven = false;
+//    foreach ($apenAllPages as $index=>$apen_url ) {
+//      if ($google_url[0] == $apen_url['url']) {
+//        // var_dump($apenPage);
+//        // var_dump($GAPage[0]);
+//        $magBlijven = true;
+//      }
+//    }
+//    if ($magBlijven) {
+//      array_push($blijven, $apenPage['url']);
+//    }
+//    else {
+//      array_push($verwijderen, $apenPage['url']);
+//    }
+//  }
+//
+//
+//
+
+
+
+
+  foreach ($apenAllPages as $apenIndex=>$apenPage) {
     $magBlijven = false;
-    foreach ($apenAllPages as $apenIndex=>$apenPage) {
-      if ($GAPage[0] == $apenPage) {
+    foreach ($total as $GAIndex=>$GAPage ) {
+      if ($GAPage[0] == $apenPage['url']) {
         // var_dump($apenPage);
         // var_dump($GAPage[0]);
         $magBlijven = true;
       }
     }
     if ($magBlijven) {
-      array_push($blijven, $GAPage[0]);
+      $page_to_stay['url'] = $apenPage['url'];
+      $page_to_stay['id'] = $apenPage['id'];
+      array_push($blijven, $page_to_stay);
     }
     else {
-      array_push($verwijderen, $GAPage[0]);
+      $page_to_remove['url'] = $apenPage['url'];
+      $page_to_remove['id'] = $apenPage['id'];
+      array_push($verwijderen, $page_to_remove);
     }
   }
-  $brokenPatterns = array('# -#', '#\+#', '#- #');
-  foreach ($verwijderen as $key=>$value) {
-    $brokenUrl = false;
-    foreach ($brokenPatterns as $pattern) {
-      if (preg_match($pattern, $value)) {
-        $brokenUrl = true;
-      }
-    }
-    if ($brokenUrl) {
-      unset($verwijderen[$key]);
-    }
-  }
-  $verwijderen = array_values($verwijderen);
+//  $brokenPatterns = array('# -#', '#\+#', '#- #');
+//  foreach ($verwijderen as $key=>$value) {
+//    $brokenUrl = false;
+//    foreach ($brokenPatterns as $pattern) {
+//      if (preg_match($pattern, $value['url'])) {
+//        $brokenUrl = true;
+//      }
+//    }
+//    if ($brokenUrl) {
+//      unset($verwijderen[$key]);
+//    }
+//  }
+  file_put_contents("remove_frome_db_array.json",json_encode($verwijderen));
+//  $verwijderen = array_values($verwijderen);
 
   // $filename = 'webdata_' . date('Ymd') . '.csv';
 
@@ -124,41 +156,41 @@ if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
   // fclose($out);
 
 // Create new PHPExcel object
-$objPHPExcel = new PHPExcel();
-// Set document properties
-$objPHPExcel->getProperties()->setCreator("Maarten Balliauw")
-               ->setLastModifiedBy("Maarten Balliauw")
-               ->setTitle("Office 2007 XLSX Test Document")
-               ->setSubject("Office 2007 XLSX Test Document")
-               ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
-               ->setKeywords("office 2007 openxml php")
-               ->setCategory("Test result file");
-
-  foreach ($verwijderen as $key=>$value) {
-    $rownumber = $key+1;
-    $objPHPExcel->setActiveSheetIndex(0)
-            ->setCellValue('A' . $rownumber, $value);
-  }
-  
- // Redirect output to a client’s web browser (Excel2007)
-  header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-  header('Content-Type: text/html; charset=UTF-8');
-  header('Content-Disposition: attachment;filename="01simple.xlsx"');
-  header('Cache-Control: max-age=0');
-  // If you're serving to IE 9, then the following may be needed
-  header('Cache-Control: max-age=1');
-  // If you're serving to IE over SSL, then the following may be needed
-  header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
-  header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
-  header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
-  header ('Pragma: public'); // HTTP/1.0
-  $objPHPExcel = mb_convert_encoding($objPHPExcel,'UTF-8');
-  $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
-  $objWriter->save('php://output');
+//$objPHPExcel = new PHPExcel();
+//// Set document properties
+//$objPHPExcel->getProperties()->setCreator("Maarten Balliauw")
+//               ->setLastModifiedBy("Maarten Balliauw")
+//               ->setTitle("Office 2007 XLSX Test Document")
+//               ->setSubject("Office 2007 XLSX Test Document")
+//               ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+//               ->setKeywords("office 2007 openxml php")
+//               ->setCategory("Test result file");
+//
+//  foreach ($verwijderen as $key=>$value) {
+//    $rownumber = $key+1;
+//    $objPHPExcel->setActiveSheetIndex(0)
+//            ->setCellValue('A' . $rownumber, $value);
+//  }
+//
+// // Redirect output to a client’s web browser (Excel2007)
+//  header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+//  header('Content-Type: text/html; charset=UTF-8');
+//  header('Content-Disposition: attachment;filename="01simple.xlsx"');
+//  header('Cache-Control: max-age=0');
+//  // If you're serving to IE 9, then the following may be needed
+//  header('Cache-Control: max-age=1');
+//  // If you're serving to IE over SSL, then the following may be needed
+//  header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+//  header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+//  header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+//  header ('Pragma: public'); // HTTP/1.0
+//  $objPHPExcel = mb_convert_encoding($objPHPExcel,'UTF-8');
+//  $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+//  $objWriter->save('php://output');
 
   // $rows = $total; array_push($verwijderen, $apenPage);
 } else {
-  $redirect_uri = 'http://' . $_SERVER['HTTP_HOST'] . '/apen.be/test/oauth2callback.php';
+  $redirect_uri = 'http://' . $_SERVER['HTTP_HOST'] . '/test/google_analytics/google-api-php-client-2.1.2/oauth2callback.php';
   header('Location: ' . filter_var($redirect_uri, FILTER_SANITIZE_URL));
 }
 
@@ -219,80 +251,115 @@ function getResults($analytics, $profileId, $start_index) {
 
 ?>
 
-<!DOCTYPE html>
+
+
+
+<?php
+$myfile = fopen("overzicht.html", "w") or die("Unable to open file!");
+$txt = "<!DOCTYPE html>
 <html>
 <head>
   <title>
   </title>
+   <link rel='stylesheet' type='text/css' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css'>
 </head>
 <body>
-  <h1>BLIJVEN</h1>
-  <table>
-    <thead>
-      <tr>
-        <th>Number</th>
-        <th>Paginas</th>
-      </tr>
-    </thead>
-    <tbody>
-      <?php foreach ($blijven as $key=>$row): ?>
-        <tr>
-            <td><?= $key ?></td>
-            <td><?= $row ?></td>
-        </tr>
-      <?php endforeach; ?>
-    </tbody>
-  </table>
-  <h2>VERWIJDEREN</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Number</th>
-        <th>Paginas</th>
-      </tr>
-    </thead>
-    <tbody>
-      <?php foreach ($verwijderen as $key=>$row): ?>
-        <tr>
-            <td><?= $key ?></td>
-            <td><?= $row ?></td>
-        </tr>
-      <?php endforeach; ?>
-    </tbody>
-<!--   </table>
-  <h1>ALLE GApagina's</h1>
-  <table>
-    <thead>
-      <tr>
-        <th>Number</th>
-        <th>Paginas</th>
-      </tr>
-    </thead>
-    <tbody>
-      <?php foreach ($test as $key=>$row): ?>
-        <tr>
-            <td><?= $key ?></td>
-            <td><?= $row[0] ?></td>
-        </tr>
-      <?php endforeach; ?>
-    </tbody>
-  </table>
-  <h1>ALLE ONLINE PAGINA'S</h1>
-  <table>
-    <thead>
-      <tr>
-        <th>Number</th>
-        <th>Paginas</th>
-      </tr>
-    </thead>
-    <tbody>
-      <?php foreach ($apenAllPages as $key=>$row): ?>
-        <tr>
-            <td><?= $key ?></td>
-            <td><?= $row ?></td>
-        </tr>
-      <?php endforeach; ?>
-    </tbody>
-  </table> -->
-</body>
-</html>
+<h1 class='col-md-6'>BLIJVEN (".count($blijven).") </h1>
+<h1 class='col-md-6'>VERWIJDEREN (".count($verwijderen).")</h1>";
+fwrite($myfile, $txt);
+
+$txt ="<div class='col-md-6'>";
+fwrite($myfile, $txt);
+foreach ($blijven as $key=>$row){
+  $txt ="<div class='col-md-2'>".$row['id']."</div><div class='col-md-10'>".$row['url']."</div>";
+  fwrite($myfile, $txt);
+};
+$txt ="</div>";
+fwrite($myfile, $txt);
+
+$txt ="<div class='col-md-6'>";
+fwrite($myfile, $txt);
+foreach ($verwijderen as $key=>$row){
+  $txt ="<div class='col-md-2'>".$row['id']."</div><div class='col-md-10'>".$row['url']."</div>";
+  fwrite($myfile, $txt);
+};
+$txt ="<div>";
+fwrite($myfile, $txt);
+//fwrite($myfile, $txt);
+fclose($myfile);
+
+echo 'done';
+?>
+
+
+
+<!--  <h1>BLIJVEN</h1>-->
+<!--  <table>-->
+<!--    <thead>-->
+<!--      <tr>-->
+<!--        <th>Number</th>-->
+<!--        <th>Paginas</th>-->
+<!--      </tr>-->
+<!--    </thead>-->
+<!--    <tbody>-->
+<!--      --><?php //foreach ($blijven as $key=>$row): ?>
+<!--        <tr>-->
+<!--            <td>--><?//= $key ?><!--</td>-->
+<!--            <td>--><?//= $row ?><!--</td>-->
+<!--        </tr>-->
+<!--      --><?php //endforeach; ?>
+<!--    </tbody>-->
+<!--  </table>-->
+<!--  <h2>VERWIJDEREN</h2>-->
+<!--  <table>-->
+<!--    <thead>-->
+<!--      <tr>-->
+<!--        <th>Number</th>-->
+<!--        <th>Paginas</th>-->
+<!--      </tr>-->
+<!--    </thead>-->
+<!--    <tbody>-->
+<!--      --><?php //foreach ($verwijderen as $key=>$row): ?>
+<!--        <tr>-->
+<!--            <td>--><?//= $key ?><!--</td>-->
+<!--            <td>--><?//= $row ?><!--</td>-->
+<!--        </tr>-->
+<!--      --><?php //endforeach; ?>
+<!--    </tbody>-->
+<!--<!--   </table>-->
+<!--  <h1>ALLE GApagina's</h1>-->
+<!--  <table>-->
+<!--    <thead>-->
+<!--      <tr>-->
+<!--        <th>Number</th>-->
+<!--        <th>Paginas</th>-->
+<!--      </tr>-->
+<!--    </thead>-->
+<!--    <tbody>-->
+<!--      --><?php //foreach ($test as $key=>$row): ?>
+<!--        <tr>-->
+<!--            <td>--><?//= $key ?><!--</td>-->
+<!--            <td>--><?//= $row[0] ?><!--</td>-->
+<!--        </tr>-->
+<!--      --><?php //endforeach; ?>
+<!--    </tbody>-->
+<!--  </table>-->
+<!--  <h1>ALLE ONLINE PAGINA'S</h1>-->
+<!--  <table>-->
+<!--    <thead>-->
+<!--      <tr>-->
+<!--        <th>Number</th>-->
+<!--        <th>Paginas</th>-->
+<!--      </tr>-->
+<!--    </thead>-->
+<!--    <tbody>-->
+<!--      --><?php //foreach ($apenAllPages as $key=>$row): ?>
+<!--        <tr>-->
+<!--            <td>--><?//= $key ?><!--</td>-->
+<!--            <td>--><?//= $row ?><!--</td>-->
+<!--        </tr>-->
+<!--      --><?php //endforeach; ?>
+<!--    </tbody>-->
+<!--  </table> -->-->
+<!--</body>-->
+<!--</html>-->

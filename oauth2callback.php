@@ -11,7 +11,7 @@ session_start();
 // from the client_secrets.json you downloaded from the Developers Console.
 $client = new Google_Client();
 $client->setAuthConfig(__DIR__ . '/client_secrets.json');
-$client->setRedirectUri('http://' . $_SERVER['HTTP_HOST'] . '/apen.be/test/oauth2callback.php');
+$client->setRedirectUri('http://' . $_SERVER['HTTP_HOST'] . '/test/google_analytics/google-api-php-client-2.1.2/oauth2callback.php');
 $client->addScope(Google_Service_Analytics::ANALYTICS_READONLY);
 
 // Handle authorization flow from the server.
@@ -21,6 +21,6 @@ if (! isset($_GET['code'])) {
 } else {
   $client->authenticate($_GET['code']);
   $_SESSION['access_token'] = $client->getAccessToken();
-  $redirect_uri = 'http://' . $_SERVER['HTTP_HOST'] . '/apen.be/test';
+  $redirect_uri = 'http://' . $_SERVER['HTTP_HOST'] . '/test/google_analytics/google-api-php-client-2.1.2';
   header('Location: ' . filter_var($redirect_uri, FILTER_SANITIZE_URL));
 }
